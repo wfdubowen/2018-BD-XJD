@@ -9,29 +9,27 @@ from torchvision import datasets, models, transforms
 from torch.autograd import Variable
 from math import ceil
 from torch.nn.functional import softmax
-from models.inception_resnet_v2 import inceptionresnetv2
-from models.xception import xception
-from models.models import Modified_Densenet201
-from models.models import Modified_Resnet152
+import models.models as md
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "2"
 
-rawdata_root = './dataset/data/test'
+rawdata_root = './dataset/data/grayImage_test'
+# rawdata_root = './dataset/data/translate_test'
 true_test_pb = pd.read_csv("./dataset/data/test.txt", sep=" ", header=None, names=['ImageName'])
 true_test_pb['label'] = 1
 
-output_name = 'Resnet152-SGD-V4'
-resume = './output/Resnet152-SGD-V4/weights-21-4978-[0.00001].pth'
+output_name = 'Resnet152-All-Trained-SGD-V4-Gray'
+resume = './output/Resnet152-All-Trained-SGD-V4-Gray/weights-13-234-[0.00001].pth'
 
 # Normal's transforms
 test_transforms = transforms.Compose([
-                transforms.Resize(224),
-                transforms.CenterCrop(224),
+                # transforms.Resize(224),
+                # transforms.CenterCrop(224),
                 transforms.ToTensor(),
                 transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
             ])
 
-# Xception's transforms
+# PNASnet's transforms
 # test_transforms = transforms.Compose([
 #                 transforms.Resize(299),
 #                 transforms.CenterCrop(299),
@@ -51,10 +49,9 @@ if __name__ == '__main__':
     data_loader['test'] = torchdata.DataLoader(data_set['test'], batch_size=4, num_workers=4,
                                            shuffle=False, pin_memory=True, collate_fn=collate_fn)
 
-    # model = inceptionresnetv2(num_classes=100, pretrained='imagenet')
-    # model = xception(pretrained='imagenet')
-    # model = Modified_Densenet201(num_classs=100)
-    model = Modified_Resnet152(num_classs=100)
+    # model = md.Modified_Densenet169(num_classs=100)
+    model = md.Modified_Resnet152(num_classs=100)
+    # model = md.Modified_SENet154(num_classs=100)
 
     print('Resuming finetune from %s' % resume)
     model.load_state_dict(torch.load(resume))
